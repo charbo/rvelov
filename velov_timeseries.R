@@ -22,3 +22,10 @@ forecastOne <- function(idStation, datasStation, inte) {
   res <- data.frame(station = idStation, mean1 = fcast$mean[1], mean2 = fcast$mean[2], mean3 = fcast$mean[3])
   res
 }
+
+merge <- merge(stations, res, by.x="ID_STATION", by.y="station", all.x = TRUE)
+
+leaflet(data = merge) %>% setView(lng = 4.84, lat = 45.75, zoom = 13) %>%
+  addCircleMarkers(
+    lng = ~LONG, lat = ~LAT, stroke = FALSE, fillOpacity = 1, radius = ~mean1, fill = TRUE
+  ) %>% addProviderTiles("Stamen.Toner")
