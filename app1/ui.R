@@ -1,6 +1,5 @@
-
-
-library(shiny)
+library("shiny")
+library("leaflet");
 
 # Define UI for slider demo application
 shinyUI(fluidPage(
@@ -14,12 +13,13 @@ shinyUI(fluidPage(
     sidebarPanel(
       # Simple integer interval
       sliderInput("integer", "Integer:", 
-                  min=0, max=15, value=5, step=5)
+                  min=0, max=45, value=15, step=15)
       
     ),
     
     # Show a table summarizing the values entered
     mainPanel(
+      leafletOutput("mymap", width=1000, height=800),
       tableOutput("values")
     )
   )

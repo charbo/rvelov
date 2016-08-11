@@ -2,6 +2,10 @@ library("RMySQL")
 library("zoo")
 library("forecast")
 
+con <- dbConnect(MySQL(), user = 'root', password = 'root', host = '192.168.0.30', dbname='test')
+sqlStat <- "select * from stations"
+stations <- dbGetQuery(conn = con, statement = sqlStat)
+merge <- merge(stations, res, by.x="ID_STATION", by.y="station", all.x = TRUE)
 
 forecastAll <- function(startDate, endDate) {
   sql <- paste("SELECT s.ID_STATION, IF(s.INTERVALLE < @a, @b:=@b+1, @b) as VALUE_B,  s.INTERVALLE + 288 * @b AS INTERVALLE, MIN(s.DATE) AS DATE, AVG(s.DISPONIBLES) AS DISPONIBLES, @a := s.INTERVALLE as previous FROM station s, (select @a:= 1, @b:=0) as init WHERE s.DATE BETWEEN '",startDate,"' AND '",endDate,"' GROUP BY s.ID_STATION, s.JOUR , s.INTERVALLE ORDER BY s.ID;", sep="")
@@ -23,9 +27,8 @@ forecastOne <- function(idStation, datasStation, inte) {
   res
 }
 
-merge <- merge(stations, res, by.x="ID_STATION", by.y="station", all.x = TRUE)
-
-leaflet(data = merge) %>% setView(lng = 4.84, lat = 45.75, zoom = 13) %>%
-  addCircleMarkers(
-    lng = ~LONG, lat = ~LAT, stroke = FALSE, fillOpacity = 1, radius = ~mean1, fill = TRUE
-  ) %>% addProviderTiles("Stamen.Toner")
+forecastQuarter <- function() {
+  today <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+  before <- format(Sys.time() - 7*60*60*24, "%Y-%m-%d %H:%M:%S")
+  forecastAll(before, today)
+}
